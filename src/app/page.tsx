@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import styled from "styled-components";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useMbtiResult } from "@/hooks/useMbtiResult";
 
 interface Question {
   id: number;
@@ -9,6 +11,7 @@ interface Question {
   optionA: string;
   optionB: string;
   type: "E-I" | "S-N" | "T-F" | "J-P";
+  aValue: 1 | -1;
 }
 
 const questions: Question[] = [
@@ -19,13 +22,15 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "E-I",
+    aValue: 1,
   },
   {
     id: 2,
     question: "혼자 있는 시간이 필요하다",
-    optionA: "아니다",
-    optionB: "그렇다",
+    optionA: "그렇다",
+    optionB: "아니다",
     type: "E-I",
+    aValue: -1,
   },
   {
     id: 3,
@@ -33,6 +38,7 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "E-I",
+    aValue: 1,
   },
 
   // S-N 질문들
@@ -42,13 +48,15 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "S-N",
+    aValue: 1,
   },
   {
     id: 5,
     question: "미래의 가능성과 새로운 아이디어에 관심이 많다",
-    optionA: "아니다",
-    optionB: "그렇다",
+    optionA: "그렇다",
+    optionB: "아니다",
     type: "S-N",
+    aValue: -1,
   },
   {
     id: 6,
@@ -56,6 +64,7 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "S-N",
+    aValue: 1,
   },
 
   // T-F 질문들
@@ -65,20 +74,23 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "T-F",
+    aValue: 1,
   },
   {
     id: 8,
     question: "다른 사람의 감정을 고려한다",
-    optionA: "아니다",
-    optionB: "그렇다",
+    optionA: "그렇다",
+    optionB: "아니다",
     type: "T-F",
+    aValue: -1,
   },
   {
     id: 9,
     question: "공정함보다는 따뜻함을 중요하게 생각한다",
-    optionA: "아니다",
-    optionB: "그렇다",
+    optionA: "그렇다",
+    optionB: "아니다",
     type: "T-F",
+    aValue: -1,
   },
 
   // J-P 질문들
@@ -88,13 +100,15 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "J-P",
+    aValue: 1,
   },
   {
     id: 11,
     question: "즉흥적이고 유연하게 행동한다",
-    optionA: "아니다",
-    optionB: "그렇다",
+    optionA: "그렇다",
+    optionB: "아니다",
     type: "J-P",
+    aValue: -1,
   },
   {
     id: 12,
@@ -102,19 +116,9 @@ const questions: Question[] = [
     optionA: "그렇다",
     optionB: "아니다",
     type: "J-P",
+    aValue: 1,
   },
 ];
-
-const typeDescriptions = {
-  E: "외향적 (Extroverted) - 사람들과 어울리는 것을 좋아하고 활발함",
-  I: "내향적 (Introverted) - 혼자 있는 시간을 선호하고 조용함",
-  S: "감각적 (Sensing) - 구체적이고 실용적인 것을 선호함",
-  N: "직관적 (Intuitive) - 추상적이고 미래지향적인 것을 선호함",
-  T: "사고적 (Thinking) - 논리적이고 객관적인 판단을 함",
-  F: "감정적 (Feeling) - 감정적이고 공감능력이 뛰어남",
-  J: "판단적 (Judging) - 계획적이고 체계적인 것을 선호함",
-  P: "인식적 (Perceiving) - 유연하고 즉흥적인 것을 선호함",
-};
 
 // Styled Components
 const Container = styled.div`
@@ -308,40 +312,6 @@ const ResultMBTI = styled.div`
   margin-bottom: 2rem;
 `;
 
-const TypeGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-`;
-
-const TypeCard = styled.div`
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    transform: scale(1.05);
-  }
-`;
-
-const TypeLetter = styled.div`
-  font-size: 1.875rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 0.75rem;
-`;
-
-const TypeDescription = styled.div`
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.5;
-`;
-
 const ResetButton = styled.button`
   background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
   color: white;
@@ -361,7 +331,7 @@ const ResetButton = styled.button`
   }
 `;
 
-export default function Home() {
+function MBTIApp() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [showResult, setShowResult] = useState(false);
@@ -409,30 +379,173 @@ export default function Home() {
     setMbtiResult("");
   };
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const ResultPage = () => {
+    const { data: mbtiData, isLoading, error } = useMbtiResult(mbtiResult);
 
-  if (showResult) {
+    if (isLoading) {
+      return (
+        <Container>
+          <ResultCard>
+            <ResultTitle>MBTI 결과 분석 중...</ResultTitle>
+            <div>잠시만 기다려주세요...</div>
+          </ResultCard>
+        </Container>
+      );
+    }
+
+    if (error) {
+      return (
+        <Container>
+          <ResultCard>
+            <ResultTitle>오류 발생</ResultTitle>
+            <div>MBTI 결과를 불러올 수 없습니다.</div>
+            <ResetButton onClick={resetTest}>다시 검사하기</ResetButton>
+          </ResultCard>
+        </Container>
+      );
+    }
+
     return (
       <Container>
         <ResultCard>
-          <ResultTitle>MBTI 결과</ResultTitle>
+          <ResultTitle>{mbtiData?.title || "MBTI 결과"}</ResultTitle>
           <ResultMBTI>{mbtiResult}</ResultMBTI>
 
-          <TypeGrid>
-            {mbtiResult.split("").map((letter, index) => (
-              <TypeCard key={index}>
-                <TypeLetter>{letter}</TypeLetter>
-                <TypeDescription>
-                  {typeDescriptions[letter as keyof typeof typeDescriptions]}
-                </TypeDescription>
-              </TypeCard>
-            ))}
-          </TypeGrid>
+          {mbtiData && (
+            <>
+              <div style={{ marginBottom: "2rem", textAlign: "left" }}>
+                <h3
+                  style={{
+                    fontSize: "1.5rem",
+                    marginBottom: "1rem",
+                    color: "#1f2937",
+                  }}
+                >
+                  {mbtiData.description}
+                </h3>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gap: "1.5rem",
+                    marginBottom: "2rem",
+                  }}
+                >
+                  <div>
+                    <h4
+                      style={{
+                        fontSize: "1.25rem",
+                        marginBottom: "0.75rem",
+                        color: "#374151",
+                      }}
+                    >
+                      강점
+                    </h4>
+                    <ul style={{ listStyle: "none", padding: 0 }}>
+                      {mbtiData.strengths.map(
+                        (strength: string, index: number) => (
+                          <li
+                            key={index}
+                            style={{
+                              padding: "0.5rem 0",
+                              borderBottom: "1px solid #e5e7eb",
+                            }}
+                          >
+                            ✓ {strength}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4
+                      style={{
+                        fontSize: "1.25rem",
+                        marginBottom: "0.75rem",
+                        color: "#374151",
+                      }}
+                    >
+                      개선점
+                    </h4>
+                    <ul style={{ listStyle: "none", padding: 0 }}>
+                      {mbtiData.weaknesses.map(
+                        (weakness: string, index: number) => (
+                          <li
+                            key={index}
+                            style={{
+                              padding: "0.5rem 0",
+                              borderBottom: "1px solid #e5e7eb",
+                            }}
+                          >
+                            • {weakness}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "2rem" }}>
+                  <h4
+                    style={{
+                      fontSize: "1.25rem",
+                      marginBottom: "0.75rem",
+                      color: "#374151",
+                    }}
+                  >
+                    적합한 직업
+                  </h4>
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}
+                  >
+                    {mbtiData.careers.map((career: string, index: number) => (
+                      <span
+                        key={index}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)",
+                          padding: "0.5rem 1rem",
+                          borderRadius: "0.5rem",
+                          fontSize: "0.875rem",
+                          color: "#7c3aed",
+                        }}
+                      >
+                        {career}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4
+                    style={{
+                      fontSize: "1.25rem",
+                      marginBottom: "0.75rem",
+                      color: "#374151",
+                    }}
+                  >
+                    인간관계
+                  </h4>
+                  <p style={{ color: "#6b7280", lineHeight: "1.6" }}>
+                    {mbtiData.relationships}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
 
           <ResetButton onClick={resetTest}>다시 검사하기 ✨</ResetButton>
         </ResultCard>
       </Container>
     );
+  };
+
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+  if (showResult) {
+    return <ResultPage />;
   }
 
   return (
@@ -465,13 +578,23 @@ export default function Home() {
         {/* 답변 버튼 */}
         <ButtonContainer>
           <PrimaryButton
-            onClick={() => handleAnswer(questions[currentQuestion].type, 1)}
+            onClick={() =>
+              handleAnswer(
+                questions[currentQuestion].type,
+                questions[currentQuestion].aValue
+              )
+            }
           >
             {questions[currentQuestion].optionA}
           </PrimaryButton>
 
           <SecondaryButton
-            onClick={() => handleAnswer(questions[currentQuestion].type, -1)}
+            onClick={() =>
+              handleAnswer(
+                questions[currentQuestion].type,
+                -questions[currentQuestion].aValue
+              )
+            }
           >
             {questions[currentQuestion].optionB}
           </SecondaryButton>
@@ -485,5 +608,15 @@ export default function Home() {
         </InfoText>
       </Card>
     </Container>
+  );
+}
+
+export default function Home() {
+  const queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MBTIApp />
+    </QueryClientProvider>
   );
 }
