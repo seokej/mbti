@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import {
   getFirestore,
   collection,
@@ -19,11 +19,22 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+// 이미 초기화된 앱이 있으면 재사용, 없으면 새로 생성
+const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getFirestore(app);
 
 export async function GET(request: Request) {
   try {
+    // 환경변수 확인
+    if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
+      console.error("Firebase 환경변수가 설정되지 않았습니다.");
+      return NextResponse.json(
+        { error: "서버 설정 오류가 발생했습니다." },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const mbtiType = searchParams.get("type");
 
