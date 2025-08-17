@@ -1,16 +1,32 @@
 const { initializeApp } = require("firebase/app");
 const { getFirestore, collection, addDoc } = require("firebase/firestore");
+const path = require("path");
 
-// Firebase 설정 (실제 값으로 교체하세요)
+// 절대 경로로 .env.local 파일 로드
+require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
+
+// Firebase 설정 (환경변수 사용)
 const firebaseConfig = {
-  apiKey: "your_api_key_here",
-  authDomain: "your_project.firebaseapp.com",
-  projectId: "your_project_id",
-  storageBucket: "your_project.appspot.com",
-  messagingSenderId: "your_sender_id",
-  appId: "your_app_id",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// 디버깅을 위한 설정 로그 출력
+console.log("Firebase 설정 확인:");
+console.log("Project ID:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+console.log(
+  "API Key:",
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "설정됨" : "설정되지 않음"
+);
+console.log("Auth Domain:", process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN);
+console.log("환경변수 파일 경로:", path.resolve(__dirname, "../.env.local"));
+
+// Firebase 초기화
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -102,6 +118,93 @@ const mbtiData = [
     careers: ["기자", "마케터", "교사", "상담사", "예술가"],
     relationships:
       "ENFP는 열정적이고 자유로운 관계를 추구하며, 함께 성장하는 파트너를 원합니다.",
+  },
+  {
+    type: "ESFJ",
+    title: "집정관 (Consul)",
+    description: "사람들을 돕고 보호하는 따뜻한 마음을 가진 사회적 존재입니다.",
+    strengths: ["사교적", "책임감", "실용적", "동정심"],
+    weaknesses: ["변화 싫어함", "갈등 회피", "비판에 민감함"],
+    careers: ["간호사", "교사", "상담사", "인사담당자", "사회복지사"],
+    relationships:
+      "ESFJ는 안정적이고 전통적인 관계를 추구하며, 가족과 친구를 소중히 여깁니다.",
+  },
+  {
+    type: "ESFP",
+    title: "연예인 (Entertainer)",
+    description:
+      "자유분방하고 재미있는 영혼으로, 삶을 즐기고 다른 사람들도 즐겁게 만듭니다.",
+    strengths: ["낙관적", "사교적", "실용적", "적응력"],
+    weaknesses: ["계획성 부족", "집중력 부족", "감정적"],
+    careers: ["연예인", "이벤트 플래너", "여행 가이드", "판매원", "요리사"],
+    relationships:
+      "ESFP는 재미있고 자유로운 관계를 추구하며, 함께 모험을 즐기는 파트너를 원합니다.",
+  },
+  {
+    type: "ISFJ",
+    title: "수호자 (Defender)",
+    description:
+      "조용하고 친절하며 헌신적인 보호자로, 다른 사람들을 돌보는 것을 좋아합니다.",
+    strengths: ["헌신적", "실용적", "인내심", "관찰력"],
+    weaknesses: ["변화 싫어함", "자기희생", "표현력 부족"],
+    careers: ["간호사", "교사", "사서", "행정직", "보육교사"],
+    relationships:
+      "ISFJ는 안정적이고 전통적인 관계를 추구하며, 파트너를 보호하고 돌봅니다.",
+  },
+  {
+    type: "ISFP",
+    title: "모험가 (Adventurer)",
+    description:
+      "유연하고 매력적인 예술가로, 자신만의 방식으로 삶을 살아갑니다.",
+    strengths: ["창의적", "유연함", "관찰력", "실용적"],
+    weaknesses: ["계획성 부족", "갈등 회피", "표현력 부족"],
+    careers: ["예술가", "디자이너", "사진작가", "수의사", "요리사"],
+    relationships:
+      "ISFP는 자유롭고 개인적인 관계를 추구하며, 개인 공간을 존중하는 파트너를 선호합니다.",
+  },
+  {
+    type: "ESTJ",
+    title: "경영자 (Executive)",
+    description:
+      "실용적이고 사실에 기반한 결정을 내리는 관리자로, 질서와 구조를 만듭니다.",
+    strengths: ["조직력", "결정력", "실용적", "책임감"],
+    weaknesses: ["유연성 부족", "감정적 민감성 부족", "완고함"],
+    careers: ["경영자", "군인", "경찰", "법무관", "프로젝트 매니저"],
+    relationships:
+      "ESTJ는 안정적이고 전통적인 관계를 추구하며, 함께 목표를 달성하는 파트너를 원합니다.",
+  },
+  {
+    type: "ESTP",
+    title: "만능재주꾼 (Virtuoso)",
+    description:
+      "대담하고 실용적인 실험가로, 위험을 감수하고 문제를 해결하는 것을 즐깁니다.",
+    strengths: ["적응력", "실용적", "대담함", "문제 해결 능력"],
+    weaknesses: ["계획성 부족", "인내심 부족", "감정적 민감성 부족"],
+    careers: ["경찰", "소방관", "군인", "운동선수", "엔지니어"],
+    relationships:
+      "ESTP는 자유롭고 모험적인 관계를 추구하며, 함께 새로운 경험을 하는 파트너를 원합니다.",
+  },
+  {
+    type: "ISTJ",
+    title: "현실주의자 (Logistician)",
+    description:
+      "실용적이고 사실에 기반한 결정을 내리는 신뢰할 수 있는 사람입니다.",
+    strengths: ["신뢰성", "실용적", "조직력", "책임감"],
+    weaknesses: ["유연성 부족", "감정적 민감성 부족", "완고함"],
+    careers: ["회계사", "법무관", "군인", "경찰", "행정직"],
+    relationships:
+      "ISTJ는 안정적이고 전통적인 관계를 추구하며, 신뢰할 수 있는 파트너를 원합니다.",
+  },
+  {
+    type: "ISTP",
+    title: "만능재주꾼 (Virtuoso)",
+    description:
+      "대담하고 실용적인 실험가로, 위험을 감수하고 문제를 해결하는 것을 즐깁니다.",
+    strengths: ["적응력", "실용적", "대담함", "문제 해결 능력"],
+    weaknesses: ["계획성 부족", "인내심 부족", "감정적 민감성 부족"],
+    careers: ["경찰", "소방관", "군인", "운동선수", "엔지니어"],
+    relationships:
+      "ISTP는 자유롭고 모험적인 관계를 추구하며, 함께 새로운 경험을 하는 파트너를 원합니다.",
   },
 ];
 

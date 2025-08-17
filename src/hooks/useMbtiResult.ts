@@ -11,11 +11,19 @@ interface MbtiResult {
 }
 
 const fetchMbtiResult = async (type: string): Promise<MbtiResult> => {
-  const response = await fetch(`/api/mbti-results?type=${type}`);
-  if (!response.ok) {
+  try {
+    const response = await fetch(`/api/mbti-results?type=${type}`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${response.statusText}`
+      );
+    }
+    return response.json();
+  } catch (error) {
+    console.error("MBTI 결과 조회 실패:", error);
     throw new Error("MBTI 결과를 가져올 수 없습니다.");
   }
-  return response.json();
 };
 
 export const useMbtiResult = (type: string) => {
@@ -24,5 +32,6 @@ export const useMbtiResult = (type: string) => {
     queryFn: () => fetchMbtiResult(type),
     enabled: !!type,
     staleTime: 1000 * 60 * 30, // 30분
+    retry: 2, // 재시도 횟수
   });
 };
